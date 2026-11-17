@@ -11,44 +11,4 @@ package org.openmrs.module.datafilter.registration;
 
 public class FullTextFilterRegistration extends FilterRegistration<FilterParameter> {
 	
-	private Class implClass;
-	
-	private String cacheMode;
-	
-	/**
-	 * Gets the implClass
-	 *
-	 * @return the implClass
-	 */
-	public Class getImplClass() {
-		return implClass;
-	}
-	
-	/**
-	 * Sets the implClass
-	 *
-	 * @param implClass the implClass to set
-	 */
-	public void setImplClass(Class implClass) {
-		this.implClass = implClass;
-	}
-	
-	/**
-	 * Gets the cacheMode
-	 *
-	 * @return the cacheMode
-	 */
-	public String getCacheMode() {
-		return cacheMode;
-	}
-	
-	/**
-	 * Sets the cacheMode
-	 *
-	 * @param cacheMode the cacheMode to set
-	 */
-	public void setCacheMode(String cacheMode) {
-		this.cacheMode = cacheMode;
-	}
-	
 }
