@@ -9,26 +9,15 @@
  */
 package org.openmrs.module.datafilter.web;
 
-import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.doAnswer;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-
 import javax.servlet.FilterChain;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.module.datafilter.DataFilterSessionContext;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({ "javax.management.*" })
-@PrepareForTest(DataFilterSessionContext.class)
 public class DataFilterWebFilterTest {
 	
 	@Mock
@@ -36,17 +25,12 @@ public class DataFilterWebFilterTest {
 	
 	@Test
 	public void doFilter_shouldAlwaysResetTheFiltersOnTheCurrentThread() throws Exception {
-		mockStatic(DataFilterSessionContext.class);
-		try (AutoCloseable ignored = MockitoAnnotations.openMocks(this)) {
-			AtomicBoolean wasCalled = new AtomicBoolean(false);
-			doAnswer((invocation) -> {
-				wasCalled.set(true);
-				return null;
-			}).when(DataFilterSessionContext.class, "reset");
+		try (AutoCloseable ignored = MockitoAnnotations.openMocks(this);
+		        MockedStatic<DataFilterSessionContext> mock = Mockito.mockStatic(DataFilterSessionContext.class)) {
 			
 			new DataFilterWebFilter().doFilter(null, null, filterChain);
 			
-			assertTrue(wasCalled.get());
+			mock.verify(DataFilterSessionContext::reset);
 		}
 	}
 	

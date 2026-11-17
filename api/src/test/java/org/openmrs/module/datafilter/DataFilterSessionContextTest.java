@@ -18,31 +18,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.support.membermodification.MemberMatcher.method;
-import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.api.context.Daemon;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
 import org.springframework.orm.hibernate5.SpringSessionContext;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({ "javax.management.*" })
-@PrepareForTest({ SpringSessionContext.class, Daemon.class, Util.class })
 public class DataFilterSessionContextTest {
+	
+	@Rule
+	public StaticMocks statics = new StaticMocks();
 	
 	@Mock
 	private SessionFactoryImplementor sfImpl;
@@ -65,8 +57,7 @@ public class DataFilterSessionContextTest {
 	
 	@Test
 	public void currentSession_shouldSkipIfTheMethodHasAlreadyBeenCalledOnTheCurrentThread() {
-		mockStatic(Util.class);
-		suppress(method(SpringSessionContext.class, "currentSession"));
+		statics.mock(Util.class);
 		
 		Session mockSession = mock(Session.class);
 		when(sfImpl.openSession()).thenReturn(mockSession);
@@ -74,7 +65,7 @@ public class DataFilterSessionContextTest {
 		sessionProperties.put(DataFilterConstants.MODULE_ID + "filters.applied", "true");
 		when(mockSession.getProperties()).thenReturn(sessionProperties);
 		
-		Whitebox.setInternalState(DataFilterSessionContext.class, "log", mockLogger);
+		TestReflection.setInternalState(DataFilterSessionContext.class, "log", mockLogger);
 		when(mockLogger.isTraceEnabled()).thenReturn(true);
 		
 		DataFilterSessionContext sessionContext = new DataFilterSessionContext(sfImpl) {
@@ -93,10 +84,10 @@ public class DataFilterSessionContextTest {
 	
 	@Test
 	public void currentSession_shouldNotSkipIfTheMethodHasNotYetBeenCalledOnTheCurrentThread() {
-		mockStatic(Util.class);
+		statics.mock(Util.class);
 		final Session mockSession = mock(Session.class);
 		when(mockSession.getProperties()).thenReturn(mock(Map.class));
-		Whitebox.setInternalState(DataFilterSessionContext.class, "log", mockLogger);
+		TestReflection.setInternalState(DataFilterSessionContext.class, "log", mockLogger);
 		
 		DataFilterSessionContext sessionContext = new DataFilterSessionContext(sfImpl) {
 			
@@ -113,15 +104,14 @@ public class DataFilterSessionContextTest {
 	
 	@Test
 	public void currentSession_shouldSkipIfTheMethodIsCalledOnADaemonThread() {
-		mockStatic(Daemon.class);
-		mockStatic(Util.class);
-		PowerMockito.when(Daemon.isDaemonThread()).thenReturn(true);
-		suppress(method(SpringSessionContext.class, "currentSession"));
+		statics.mock(Daemon.class);
+		statics.mock(Util.class);
+		when(Daemon.isDaemonThread()).thenReturn(true);
 		
 		final Session mockSession = mock(Session.class);
 		when(mockSession.getProperties()).thenReturn(mock(Map.class));
 		
-		Whitebox.setInternalState(DataFilterSessionContext.class, "log", mockLogger);
+		TestReflection.setInternalState(DataFilterSessionContext.class, "log", mockLogger);
 		
 		DataFilterSessionContext sessionContext = new DataFilterSessionContext(sfImpl) {
 			

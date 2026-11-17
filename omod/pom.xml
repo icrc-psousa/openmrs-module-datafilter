@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.openmrs.module</groupId>
         <artifactId>datafilter</artifactId>
-        <version>2.3.0-SNAPSHOT</version>
+        <version>2.4.0-SNAPSHOT</version>
     </parent>
     
     <artifactId>datafilter-omod</artifactId>
@@ -62,6 +62,13 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- Needed for static mocking, must match the Mockito version used by openmrs-test -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>3.12.4</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

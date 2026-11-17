@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 import static org.openmrs.module.datafilter.DataFilterConstants.BYPASS_PRIV_SUFFIX;
 import static org.openmrs.module.datafilter.DataFilterConstants.MODULE_ID;
 import static org.openmrs.module.datafilter.Util.getDocumentBuilder;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,8 +37,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.FilterDef;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Concept;
@@ -51,16 +50,12 @@ import org.openmrs.module.datafilter.annotations.FilterDefAnnotation;
 import org.openmrs.module.datafilter.registration.HibernateFilterParameter;
 import org.openmrs.module.datafilter.registration.HibernateFilterRegistration;
 import org.openmrs.util.OpenmrsClassLoader;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.w3c.dom.Document;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({ "javax.management.*", "org.xml.*" })
-@PrepareForTest({ Context.class, FileUtils.class })
 public class UtilTest {
+	
+	@Rule
+	public StaticMocks statics = new StaticMocks();
 	
 	private static final String TEST_HIBERNATE_CFG_FILE = "testHibernateCfg.xml";
 	
@@ -190,7 +185,7 @@ public class UtilTest {
 	
 	@Test
 	public void updateResourceLocation_shouldReplaceMappingResourceLocationsWithFileLocations() throws Exception {
-		mockStatic(FileUtils.class);
+		statics.mock(FileUtils.class);
 		String expectedFilePath = "/tmp/path/" + MODULE_ID + "/" + TEST_LOCATION_HBM_FILE;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		InputStream in = OpenmrsClassLoader.getInstance().getResourceAsStream(TEST_HIBERNATE_CFG_FILE);
@@ -207,7 +202,7 @@ public class UtilTest {
 	
 	@Test
 	public void isFilterDisabled_shouldReturnFalseIfTheDisableGPForTheFilterIsNotSet() {
-		mockStatic(Context.class);
+		statics.mock(Context.class);
 		when(Context.getRegisteredComponent("adminDAO", AdministrationDAO.class)).thenReturn(adminDAO);
 		when(adminDAO.executeSQL(anyString(), eq(true))).thenReturn(Collections.emptyList());
 		assertFalse(Util.isFilterDisabled("someFilter"));
@@ -215,7 +210,7 @@ public class UtilTest {
 	
 	@Test
 	public void isFilterDisabled_shouldReturnFalseIfTheDisableGPForTheFilterIsSetToFalse() {
-		mockStatic(Context.class);
+		statics.mock(Context.class);
 		when(Context.getRegisteredComponent("adminDAO", AdministrationDAO.class)).thenReturn(adminDAO);
 		List<List<Object>> expectedRows = Collections.singletonList(Collections.singletonList("false"));
 		when(adminDAO.executeSQL(anyString(), eq(true))).thenReturn(expectedRows);
@@ -224,7 +219,7 @@ public class UtilTest {
 	
 	@Test
 	public void isFilterDisabled_shouldReturnTrueIfTheDisableGPForTheFilterISetToTrue() {
-		mockStatic(Context.class);
+		statics.mock(Context.class);
 		when(Context.getRegisteredComponent("adminDAO", AdministrationDAO.class)).thenReturn(adminDAO);
 		List<List<Object>> expectedRows = Collections.singletonList(Collections.singletonList("true"));
 		when(adminDAO.executeSQL(anyString(), eq(true))).thenReturn(expectedRows);
@@ -233,14 +228,14 @@ public class UtilTest {
 	
 	@Test
 	public void skipFilter_shouldReturnFalseIfTheFilterIsNotDisabledAndTheUserHasNoByPassPrivilege() {
-		mockStatic(Context.class);
+		statics.mock(Context.class);
 		when(Context.getRegisteredComponent("adminDAO", AdministrationDAO.class)).thenReturn(adminDAO);
 		assertFalse(Util.skipFilter("someFilter"));
 	}
 	
 	@Test
 	public void skipFilter_shouldReturnTrueIfTheFilterIsDisabled() {
-		mockStatic(Context.class);
+		statics.mock(Context.class);
 		when(Context.getRegisteredComponent("adminDAO", AdministrationDAO.class)).thenReturn(adminDAO);
 		List<List<Object>> expectedRows = Collections.singletonList(Collections.singletonList("true"));
 		when(adminDAO.executeSQL(anyString(), eq(true))).thenReturn(expectedRows);
@@ -250,11 +245,11 @@ public class UtilTest {
 	
 	@Test
 	public void skipFilter_shouldReturnTrueIfTheUserHasTheIndividualFilterByPassPrivilege() {
-		mockStatic(Context.class);
+		statics.mock(Context.class);
 		when(Context.getRegisteredComponent("adminDAO", AdministrationDAO.class)).thenReturn(adminDAO);
 		final String filterName = "someFilter";
-		PowerMockito.when(Context.isAuthenticated()).thenReturn(true);
-		PowerMockito.when(Context.hasPrivilege(filterName + BYPASS_PRIV_SUFFIX)).thenReturn(true);
+		when(Context.isAuthenticated()).thenReturn(true);
+		when(Context.hasPrivilege(filterName + BYPASS_PRIV_SUFFIX)).thenReturn(true);
 		assertTrue(Util.skipFilter("someFilter"));
 	}
 	

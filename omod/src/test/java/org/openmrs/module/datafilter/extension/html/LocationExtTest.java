@@ -15,10 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.openmrs.Location;
 import org.openmrs.User;
 import org.openmrs.api.LocationService;
@@ -26,19 +28,19 @@ import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.datafilter.impl.EntityBasisMap;
 import org.openmrs.module.datafilter.impl.api.DataFilterService;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
 
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({ "javax.management.*" })
 public class LocationExtTest {
+	
+	private MockedStatic<Context> contextMock;
+	
+	@After
+	public void tearDown() {
+		contextMock.close();
+	}
 	
 	private LocationExt locationExt;
 	
@@ -54,7 +56,7 @@ public class LocationExtTest {
 	@Before
 	public void setUp() {
 		initMocks(this);
-		PowerMockito.mockStatic(Context.class);
+		contextMock = Mockito.mockStatic(Context.class);
 		
 		locationExt = new LocationExt();
 		when(Context.getLocationService()).thenReturn(locationService);

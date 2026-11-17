@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.datafilter.impl.BaseFilterTest;
 import org.openmrs.module.datafilter.registration.HibernateFilterRegistration;
-import org.powermock.reflect.Whitebox;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DataFilterSessionContextSensitiveTest extends BaseFilterTest {
@@ -37,7 +36,7 @@ public class DataFilterSessionContextSensitiveTest extends BaseFilterTest {
 	@Before
 	public void setup() {
 		if (currentSessionContext == null) {
-			currentSessionContext = Whitebox.getInternalState(sessionFactory, CurrentSessionContext.class);
+			currentSessionContext = TestReflection.getInternalState(sessionFactory, CurrentSessionContext.class);
 		}
 	}
 	
