@@ -10,17 +10,15 @@
 package org.openmrs.module.datafilter.filter;
 
 import org.junit.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.datafilter.web.UserFormSubmissionHandler;
 import org.openmrs.web.WebConstants;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -32,10 +30,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({ "javax.management.*" })
 public class SubmissionFilterTest {
+	
+	private MockedStatic<Context> contextMock;
+	
+	@After
+	public void tearDown() {
+		contextMock.close();
+	}
 	
 	@Mock
 	private FilterChain filterChain;
@@ -55,7 +57,7 @@ public class SubmissionFilterTest {
 		httpServletRequest = new MockHttpServletRequest();
 		httpServletResponse = new MockHttpServletResponse();
 		
-		PowerMockito.mockStatic(Context.class);
+		contextMock = Mockito.mockStatic(Context.class);
 		submissionFilter = new SubmissionFilter();
 	}
 	

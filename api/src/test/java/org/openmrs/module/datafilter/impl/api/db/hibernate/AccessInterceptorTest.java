@@ -14,13 +14,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.openmrs.module.datafilter.DataFilterConstants.BYPASS_PRIV_SUFFIX;
 import static org.openmrs.module.datafilter.impl.ImplConstants.ENC_TYPE_PRIV_BASED_FILTER_NAME_ENCOUNTER;
 import static org.openmrs.module.datafilter.impl.ImplConstants.ENC_TYPE_PRIV_BASED_FILTER_NAME_PREFIX;
 import static org.openmrs.module.datafilter.impl.ImplConstants.LOCATION_BASED_FILTER_NAME_ENCOUNTER;
 import static org.openmrs.module.datafilter.impl.ImplConstants.LOCATION_BASED_FILTER_NAME_PREFIX;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,9 +35,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
+import org.openmrs.module.datafilter.StaticMocks;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
@@ -56,14 +55,11 @@ import org.openmrs.module.datafilter.DataFilterConstants;
 import org.openmrs.module.datafilter.Util;
 import org.openmrs.module.datafilter.impl.AccessUtil;
 import org.openmrs.module.datafilter.impl.ImplConstants;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({ "javax.management.*" })
-@PrepareForTest({ AccessUtil.class, Util.class, Context.class, Daemon.class })
 public class AccessInterceptorTest {
+	
+	@Rule
+	public StaticMocks statics = new StaticMocks();
 	
 	private AccessInterceptor interceptor = new AccessInterceptor();
 	
@@ -77,9 +73,9 @@ public class AccessInterceptorTest {
 	@Before
 	public void beforeEachMethod() {
 		threadName = Thread.currentThread().getName();
-		mockStatic(Context.class);
-		mockStatic(AccessUtil.class);
-		mockStatic(Util.class);
+		statics.mock(Context.class);
+		statics.mock(AccessUtil.class);
+		statics.mock(Util.class);
 		adminService = mock(AdministrationService.class);
 		when(Context.getAdministrationService()).thenReturn(adminService);
 		SessionFactory sf = mock(SessionFactory.class);
@@ -122,7 +118,7 @@ public class AccessInterceptorTest {
 	
 	@Test
 	public void onLoad_shouldPassForTheDaemonThread() {
-		mockStatic(Daemon.class);
+		statics.mock(Daemon.class);
 		when(Daemon.isDaemonThread()).thenReturn(true);
 		interceptor.onLoad(null, null, null, null, null);
 	}

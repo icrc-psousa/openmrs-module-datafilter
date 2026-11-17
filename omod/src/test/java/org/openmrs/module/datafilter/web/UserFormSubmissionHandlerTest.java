@@ -11,10 +11,11 @@
 package org.openmrs.module.datafilter.web;
 
 import org.junit.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openmrs.Location;
@@ -24,10 +25,6 @@ import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.datafilter.impl.EntityBasisMap;
 import org.openmrs.module.datafilter.impl.api.DataFilterService;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -51,10 +48,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({ "javax.management.*" })
 public class UserFormSubmissionHandlerTest {
+	
+	private MockedStatic<Context> contextMock;
+	
+	@After
+	public void tearDown() {
+		contextMock.close();
+	}
 	
 	@Mock
 	private FilterChain filterChain;
@@ -74,7 +75,7 @@ public class UserFormSubmissionHandlerTest {
 	public void setUp() throws Exception {
 		initMocks(this);
 		
-		PowerMockito.mockStatic(Context.class);
+		contextMock = Mockito.mockStatic(Context.class);
 		when(Context.getRegisteredComponents(DataFilterService.class))
 		        .thenReturn(Collections.singletonList(dataFilterService));
 		when(Context.getLocationService()).thenReturn(locationService);

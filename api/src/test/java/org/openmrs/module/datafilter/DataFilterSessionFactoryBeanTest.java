@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.io.File;
 import java.util.Collections;
@@ -32,24 +31,20 @@ import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.module.datafilter.registration.HibernateFilterRegistration;
 import org.openmrs.util.OpenmrsClassLoader;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 import org.slf4j.Logger;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({ "javax.management.*" })
-@PrepareForTest({ Util.class, OpenmrsClassLoader.class })
 public class DataFilterSessionFactoryBeanTest {
+	
+	@Rule
+	public StaticMocks statics = new StaticMocks();
 	
 	@Mock
 	private Logger mockLogger;
@@ -72,9 +67,8 @@ public class DataFilterSessionFactoryBeanTest {
 		sessionFactoryBean = new DataFilterSessionFactoryBean();
 		
 		mocksClosable = MockitoAnnotations.openMocks(this);
-		mockStatic(Util.class);
-		mockStatic(OpenmrsClassLoader.class);
-		Whitebox.setInternalState(DataFilterSessionFactoryBean.class, Logger.class, mockLogger);
+		statics.mock(Util.class);
+		TestReflection.setInternalState(DataFilterSessionFactoryBean.class, Logger.class, mockLogger);
 	}
 	
 	@After
@@ -102,7 +96,7 @@ public class DataFilterSessionFactoryBeanTest {
 		final String filteredResourcesLocation = "/some/path";
 		final Set<String> mappingResources = Stream
 		        .of(module1EntityHbmFile, module1UnFilteredEntityHbmFile, module2EntityHbmFile).collect(Collectors.toSet());
-		Whitebox.setInternalState(sessionFactoryBean, "mappingResources", mappingResources);
+		TestReflection.setInternalState(sessionFactoryBean, "mappingResources", mappingResources);
 		Map<Class<?>, List<HibernateFilterRegistration>> classFiltersMap = new HashMap<>();
 		List<HibernateFilterRegistration> module1EntityFilters = Collections
 		        .singletonList(mock(HibernateFilterRegistration.class));
@@ -115,11 +109,6 @@ public class DataFilterSessionFactoryBeanTest {
 		when(Util.getMappedClassName(module1EntityHbmFile)).thenReturn(Module1Entity.class.getName());
 		when(Util.getMappedClassName(module1UnFilteredEntityHbmFile)).thenReturn(UnfilteredModule1Entity.class.getName());
 		when(Util.getMappedClassName(module2EntityHbmFile)).thenReturn(Module2Entity.class.getName());
-		when(OpenmrsClassLoader.getInstance()).thenReturn(mockClassLoader);
-		when(mockClassLoader.loadClass(Module1Entity.class.getName())).thenReturn((Class) Module1Entity.class);
-		when(mockClassLoader.loadClass(UnfilteredModule1Entity.class.getName()))
-		        .thenReturn((Class) UnfilteredModule1Entity.class);
-		when(mockClassLoader.loadClass(Module2Entity.class.getName())).thenReturn((Class) Module2Entity.class);
 		String expectedModule1ResourcePath = filteredResourcesLocation + "/" + module1EntityHbmFile;
 		File newModule1EntityHbmFile = mock(File.class);
 		when(newModule1EntityHbmFile.getAbsolutePath()).thenReturn(expectedModule1ResourcePath);
@@ -133,7 +122,7 @@ public class DataFilterSessionFactoryBeanTest {
 		
 		sessionFactoryBean.setMappingResources(mappingResources.toArray(new String[] {}));
 		
-		Resource[] mappingLocations = Whitebox.getInternalState(sessionFactoryBean, "mappingLocations");
+		Resource[] mappingLocations = TestReflection.getInternalState(sessionFactoryBean, "mappingLocations");
 		assertEquals(2, mappingLocations.length);
 		assertNotNull(Stream.of(mappingLocations)
 		        .filter(r -> ((FileSystemResource) r).getPath().equals(expectedModule1ResourcePath)).findFirst().get());
