@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -73,6 +74,12 @@ public class PatientLocationLinkingInterceptorTest extends BaseModuleContextSens
 	@Before
 	public void setup() {
 		enableInterceptor();
+	}
+	
+	@After
+	public void cleanUp() throws Exception {
+		//Some tests commit data, make sure it doesn't leak into other test classes
+		deleteAllData();
 	}
 	
 	private void enableInterceptor() {

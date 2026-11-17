@@ -49,7 +49,17 @@ public abstract class BaseFilterTest extends BaseModuleContextSensitiveTest {
 		String originalValue = null;
 		Context.addProxyPrivilege(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES);
 		AdministrationService as = Context.getAdministrationService();
-		GlobalProperty gp = as.getGlobalPropertyObject(ImplConstants.GP_RUN_IN_STRICT_MODE);
+		GlobalProperty gp;
+		try {
+			gp = as.getGlobalPropertyObject(ImplConstants.GP_RUN_IN_STRICT_MODE);
+		}
+		catch (RuntimeException e) {
+			//Core also calls this right after wiping the database, i.e. no anonymous role to check privileges against,
+			//there is nothing to index or intercept in that case
+			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_GLOBAL_PROPERTIES);
+			super.updateSearchIndex();
+			return;
+		}
 		if (gp == null) {
 			gp = new GlobalProperty(ImplConstants.GP_RUN_IN_STRICT_MODE);
 		} else {

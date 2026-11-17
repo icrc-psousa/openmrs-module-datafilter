@@ -46,7 +46,14 @@ public class ProviderProgramBasedFilterTest extends BaseProgramBasedFilterTest {
 	}
 	
 	private Collection<Provider> getProviders() {
-		return providerService.getProviders("Mulemba", null, null, null, true);
+		//Core now requires this privilege to read the match mode GP when searching providers
+		Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		try {
+			return providerService.getProviders("Mulemba", null, null, null, true);
+		}
+		finally {
+			Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+		}
 	}
 	
 	@Test

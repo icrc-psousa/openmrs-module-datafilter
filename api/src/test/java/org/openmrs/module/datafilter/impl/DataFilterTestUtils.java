@@ -69,6 +69,7 @@ public class DataFilterTestUtils {
 	
 	public static void addPrivilege(String privilege) {
 		Context.addProxyPrivilege(PrivilegeConstants.MANAGE_ROLES);
+		Context.addProxyPrivilege(PrivilegeConstants.GET_PRIVILEGES);
 		try {
 			Privilege p = Context.getUserService().getPrivilege(privilege);
 			Role role = Context.getAuthenticatedUser().getRoles().iterator().next();
@@ -78,6 +79,7 @@ public class DataFilterTestUtils {
 		}
 		finally {
 			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_ROLES);
+			Context.removeProxyPrivilege(PrivilegeConstants.GET_PRIVILEGES);
 		}
 	}
 	
