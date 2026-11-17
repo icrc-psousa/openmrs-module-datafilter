@@ -6,8 +6,6 @@
             "org.openmrs.PersonName",
             "org.openmrs.PersonAttribute"
         ],
-        "implClass" : "org.openmrs.module.datafilter.impl.PatientIdFullTextFilter",
-        "cacheMode" : "NONE",
         "parameters" : [
             {
                 "name" : "field"

@@ -13,6 +13,7 @@ import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.context.Context;
+import org.openmrs.util.PrivilegeConstants;
 
 final class InterceptorUtil {
 	
@@ -28,10 +29,13 @@ final class InterceptorUtil {
 		//the GP value below and we end up in this method again, therefore we need to disable auto flush
 		final FlushMode flushMode = session.getHibernateFlushMode();
 		session.setHibernateFlushMode(FlushMode.MANUAL);
+		//The load can be triggered by a search indexing operation running as a user without this privilege
+		Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
 		try {
 			return Context.getAdministrationService().getGlobalProperty(gpName);
 		}
 		finally {
+			Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
 			//reset
 			session.setHibernateFlushMode(flushMode);
 		}

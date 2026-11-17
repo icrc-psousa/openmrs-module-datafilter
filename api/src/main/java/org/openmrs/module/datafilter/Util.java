@@ -53,7 +53,6 @@ import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.ParamDef;
 import org.hibernate.cfg.Environment;
 import org.hibernate.internal.util.xml.DTDEntityResolver;
-import org.hibernate.search.annotations.FullTextFilterDefs;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.AdministrationDAO;
@@ -62,8 +61,6 @@ import org.openmrs.module.datafilter.annotations.FilterAnnotation;
 import org.openmrs.module.datafilter.annotations.FilterDefAnnotation;
 import org.openmrs.module.datafilter.annotations.FilterDefsAnnotation;
 import org.openmrs.module.datafilter.annotations.FiltersAnnotation;
-import org.openmrs.module.datafilter.annotations.FullTextFilterDefAnnotation;
-import org.openmrs.module.datafilter.annotations.FullTextFilterDefsAnnotation;
 import org.openmrs.module.datafilter.annotations.ParamDefAnnotation;
 import org.openmrs.module.datafilter.registration.FullTextFilterRegistration;
 import org.openmrs.module.datafilter.registration.HibernateFilterParameter;
@@ -224,13 +221,6 @@ public class Util {
 			}
 		}
 		
-		//Register full text filters
-		for (FullTextFilterRegistration registration : getFullTextFilterRegistrations()) {
-			//Full text filters are added to one entity but can be enabled for any entity
-			registerFullTextFilter(registration.getTargetClasses().get(0), new FullTextFilterDefAnnotation(
-			        registration.getName(), registration.getImplClass(), registration.getCacheMode()));
-		}
-		
 		Context.addConfigProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS, DataFilterSessionContext.class.getName());
 		
 		log.info("Successfully initialized filters");
@@ -252,19 +242,6 @@ public class Util {
 	}
 	
 	/**
-	 * Adds the specified {@link org.hibernate.search.annotations.FullTextFilterDef} annotation to the
-	 * specified class object.
-	 *
-	 * @param entityClass the class object to add the annotation
-	 * @param filterDefAnnotation the {@link org.hibernate.search.annotations.FullTextFilterDef}
-	 *            annotation to add
-	 */
-	protected static void registerFullTextFilter(Class<?> entityClass, FullTextFilterDefAnnotation filterDefAnnotation)
-	        throws ReflectiveOperationException {
-		addAnnotationToGroup(entityClass, FullTextFilterDefs.class, filterDefAnnotation);
-	}
-	
-	/**
 	 * Utility method that adds a grouped annotation to it's containing aggregate annotation.
 	 * 
 	 * @param entityClass the class that has the aggregate annotation
@@ -280,8 +257,6 @@ public class Util {
 				aggregateAnnotation = new FilterDefsAnnotation();
 			} else if (Filters.class.equals(aggregateAnnClass)) {
 				aggregateAnnotation = new FiltersAnnotation();
-			} else if (FullTextFilterDefs.class.equals(aggregateAnnClass)) {
-				aggregateAnnotation = new FullTextFilterDefsAnnotation();
 			}
 			
 			addAnnotationToClass(entityClass, aggregateAnnotation);
